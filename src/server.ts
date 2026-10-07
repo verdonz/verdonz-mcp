@@ -1,4 +1,4 @@
-import { Server } from '@modelcontextprotocol/server';
+import { Server, type Tool } from '@modelcontextprotocol/server';
 import type { Config } from './config.js';
 import { VerdonzApiClient } from './client/verdonz-client.js';
 import { MockClient } from './client/mock-client.js';
@@ -17,7 +17,7 @@ export function createClient(config: Config): VerdonzClient {
     : new VerdonzApiClient(config.baseUrl!, config.apiKey!);
 }
 
-const toolDefinitions = [
+const toolDefinitions: Tool[] = [
   {
     name: 'verdonz_list_metrics',
     description: 'List governed metric definitions the identity can access.',
@@ -95,7 +95,7 @@ const toolDefinitions = [
       },
     },
   },
-] as const;
+];
 
 export function createServer(config: Config): Server {
   const server = new Server(
