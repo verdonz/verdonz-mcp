@@ -1,6 +1,6 @@
 {
   "name": "@verdonz/mcp",
-  "version": "0.1.0",
+  "version": "26.10.1",
   "description": "An MCP server for connecting AI assistants to governed business data with Verdonz.",
   "type": "module",
   "bin": {
