@@ -1,0 +1,20 @@
+import type { AskInput, Dataset, Evidence, EvidenceInput, InvestigateInput, InvestigationResult, Metric, QueryResult, VerdonzClient } from './types.js';
+import { VerdonzError } from '../utils/errors.js';
+
+const datasets: Dataset[] = [
+  { id: 'commerce', name: 'Commerce warehouse', type: 'warehouse', description: 'Fictional revenue, customer, product, and regional data.' },
+  { id: 'product', name: 'Product analytics', type: 'warehouse', description: 'Fictional product usage and conversion data.' },
+];
+const metrics: Metric[] = [
+  { id: 'revenue', name: 'revenue', label: 'Revenue', description: 'Net recognized revenue after refunds.', definition: 'SUM(order net amount) minus refunds.', dimensions: ['region', 'product'], source: 'commerce.orders', freshness: 'Daily', aggregation: 'sum' },
+  { id: 'conversion_rate', name: 'conversion_rate', label: 'Conversion rate', description: 'Share of qualified visitors who completed a purchase.', definition: 'Conversions divided by qualified visitors.', dimensions: ['region', 'product'], source: 'product.funnel_events', freshness: 'Hourly', aggregation: 'avg' },
+  { id: 'active_customers', name: 'active_customers', label: 'Active customers', description: 'Customers with at least one order in the period.', definition: 'Count distinct customers with an order.', dimensions: ['region'], source: 'commerce.orders', freshness: 'Daily', aggregation: 'count_distinct' },
+];
+export class MockClient implements VerdonzClient {
+  async listDatasets(input: { search?: string; limit?: number }): Promise<Dataset[]> { return datasets.filter((d) => !input.search || `${d.id} ${d.name}`.toLowerCase().includes(input.search.toLowerCase())).slice(0, input.limit ?? 50); }
+  async listMetrics(input: { search?: string; limit?: number; datasetId?: string }): Promise<Metric[]> { if (input.datasetId && !datasets.some((d) => d.id === input.datasetId)) throw new VerdonzError('Dataset was not found.', 'NOT_FOUND', 404); return metrics.filter((m) => !input.search || `${m.name} ${m.label} ${m.description}`.toLowerCase().includes(input.search.toLowerCase())).slice(0, input.limit ?? 50); }
+  async getMetric(input: { metricId?: string; name?: string }): Promise<Metric> { const name = input.metricId ?? input.name; const item = metrics.find((m) => m.id === name || m.name === name || m.label?.toLowerCase() === name?.toLowerCase()); if (!item) throw new VerdonzError(`Metric "${name ?? ''}" was not found.`, 'NOT_FOUND', 404); return item; }
+  async ask(input: AskInput): Promise<QueryResult> { return { answer: `In demo data, ${input.question.toLowerCase()} is best answered by comparing revenue and conversion rate across regions.`, supportingData: [{ region: 'North America', revenue: 482000, conversion_rate: 0.041 }, { region: 'Europe', revenue: 317000, conversion_rate: 0.036 }], relevantMetrics: ['revenue', 'conversion_rate'], evidence: [{ id: 'demo-commerce-01', title: 'Demo commerce aggregate', source: 'commerce.orders', detail: 'Fictional aggregate rows for local demonstration.' }], metadata: { mode: 'mock', datasetId: input.datasetId ?? 'commerce' } }; }
+  async investigate(input: InvestigateInput): Promise<InvestigationResult> { return { metric: input.metric, summary: `Demo investigation: ${input.metric} declined 8.4% month over month, with Europe contributing the largest share of the change.`, changes: [{ dimension: 'region', value: 'Europe', change: -0.121 }, { dimension: 'region', value: 'North America', change: -0.037 }], possibleDrivers: [{ dimension: 'product', value: 'Starter plan', contribution: 0.54 }], evidence: [{ id: 'demo-investigation-01', title: 'Regional comparison', source: 'commerce.orders', detail: 'Fictional comparison-period aggregate.' }], metadata: { mode: 'mock', dimensions: input.dimensions ?? ['region', 'product'] } }; }
+  async getEvidence(input: EvidenceInput): Promise<Evidence[]> { return [{ id: input.resultId ?? 'demo-evidence-01', title: 'Demo source lineage', source: 'commerce.orders', detail: 'Fictional evidence included to demonstrate provenance handling.', metadata: { metric: input.metric ?? 'revenue' } }]; }
+}

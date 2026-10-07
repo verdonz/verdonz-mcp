@@ -1,0 +1,39 @@
+{
+  "name": "@verdonz/mcp",
+  "version": "0.1.0",
+  "description": "An MCP server for connecting AI assistants to governed business data with Verdonz.",
+  "type": "module",
+  "bin": { "verdonz-mcp": "dist/index.js" },
+  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md", "SECURITY.md", "docs", "examples"],
+  "repository": { "type": "git", "url": "git+https://github.com/verdonz/verdonz-mcp.git" },
+  "homepage": "https://www.verdonz.com",
+  "bugs": { "url": "https://github.com/verdonz/verdonz-mcp/issues" },
+  "keywords": ["mcp", "model-context-protocol", "verdonz", "analytics", "business-intelligence", "ai-agents", "semantic-layer", "governed-ai", "data", "analytics-agent"],
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/index.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
